@@ -120,18 +120,27 @@ def home():
 
 def visualize_data():
     st.title("📊 Explore the Dataset")
+
     data = pd.read_csv("insurance.csv")
+    data.columns = data.columns.str.strip().str.lower()  # Clean column names
 
     st.subheader("Dataset Overview")
     st.dataframe(data.head(10))
 
     col1, col2 = st.columns(2)
     with col1:
-        plot = px.histogram(data, x='charges', nbins=40, color='smoker', title="Distribution of Charges")
-        st.plotly_chart(plot, use_container_width=True)
+        if 'charges' in data.columns and 'smoker' in data.columns:
+            plot = px.histogram(data, x='charges', nbins=40, color='smoker', title="Distribution of Charges")
+            st.plotly_chart(plot, use_container_width=True)
+        else:
+            st.warning("Columns 'charges' or 'smoker' not found in dataset.")
     with col2:
-        plot2 = px.box(data, x='region', y='charges', color='region', title="Charges by Region")
-        st.plotly_chart(plot2, use_container_width=True)
+        if 'region' in data.columns and 'charges' in data.columns:
+            plot2 = px.box(data, x='region', y='charges', color='region', title="Charges by Region")
+            st.plotly_chart(plot2, use_container_width=True)
+        else:
+            st.warning("Columns 'region' or 'charges' not found in dataset.")
+
 
 def predict():
     st.title("🧠 Predict Insurance Cost")
