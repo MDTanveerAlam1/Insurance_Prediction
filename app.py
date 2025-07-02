@@ -164,43 +164,34 @@ def predict():
 
     st.markdown("</div>", unsafe_allow_html=True)
 
-    user_input = pd.DataFrame([{
-        'age': age,
-        'sex': sex,
-        'bmi': bmi,
-        'children': children,
-        'smoker': smoker,
-        'region': region
-    }])
-
-    user_input_encoded = pd.get_dummies(user_input)
     if model is not None:
-        try:
-            model_features = model.feature_names_in_
-        except AttributeError:
-            model_features = user_input_encoded.columns
-
-        for col in model_features:
-            if col not in user_input_encoded:
-                user_input_encoded[col] = 0
-        user_input_encoded = user_input_encoded[model_features]
-
         if st.button("Predict Cost"):
-            prediction = model.predict(user_input_encoded)[0]
-            st.markdown(f"""
-            <div style="
-                background: linear-gradient(to right, #a1c4fd, #c2e9fb);
-                padding: 1.5rem;
-                border-radius: 12px;
-                text-align: center;
-                font-size: 1.4rem;
-                font-weight: bold;
-                color: #003366;
-                box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
-            ">
-                Estimated Insurance Charges: <br> <span style="font-size: 2rem;">Rs {prediction:,.2f}</span>
-            </div>
-            """, unsafe_allow_html=True)
+            try:
+                input_df = pd.DataFrame({
+                    'age': [age],
+                    'sex': [sex],
+                    'bmi': [bmi],
+                    'children': [children],
+                    'smoker': [smoker],
+                    'region': [region]
+                })
+                result = model.predict(input_df)[0]
+                st.markdown(f"""
+                <div style="
+                    background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+                    padding: 1.5rem;
+                    border-radius: 12px;
+                    text-align: center;
+                    font-size: 1.4rem;
+                    font-weight: bold;
+                    color: #003366;
+                    box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
+                ">
+                    Estimated Insurance Charges: <br> <span style="font-size: 2rem;">Rs {result:,.2f}</span>
+                </div>
+                """, unsafe_allow_html=True)
+            except Exception as e:
+                st.error(f"Prediction failed: {e}")
 
 # === About Page ===
 def about():
