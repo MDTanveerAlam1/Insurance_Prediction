@@ -4,7 +4,6 @@ import streamlit as st
 import numpy as np
 import joblib
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # ================== PAGE CONFIG ==================
 st.set_page_config(
