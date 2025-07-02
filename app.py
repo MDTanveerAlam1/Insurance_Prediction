@@ -18,6 +18,37 @@ st.set_page_config(
 # ========= THEME TOGGLE =========
 theme = st.sidebar.selectbox("🎨 Choose Theme", ["☀️ Day Mode", "🌙 Night Mode"])
 
+# === THEME TOGGLE ===
+theme = st.sidebar.selectbox("🎨 Theme Mode", ["☀️ Day Mode", "🌙 Night Mode"])
+
+# === MINIMAL GRADIENT BACKGROUND INJECTION ===
+def apply_gradient_background(theme):
+    if theme == "☀️ Day Mode":
+        gradient = """
+        <style>
+        body {
+            background: linear-gradient(to right, #d9a7c7, #fffcdc) !important;
+            background-attachment: fixed;
+        }
+        </style>
+        """
+    else:
+        gradient = """
+        <style>
+        body {
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364) !important;
+            background-attachment: fixed;
+        }
+        </style>
+        """
+    st.markdown(gradient, unsafe_allow_html=True)
+
+apply_gradient_background(theme)
+
+
+
+
+
 # ========= DYNAMIC CSS =========
 def inject_css(theme_mode):
     if theme_mode == "☀️ Day Mode":
