@@ -1,14 +1,15 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import joblib
+import pickle
 import plotly.express as px
 
 # === Load model ===
 try:
-    model = joblib.load("random_forest_model.pkl")
+    with open("random_forest_model.pkl", "rb") as f:
+        model = pickle.load(f)
 except Exception as e:
-    st.error(f"\u274c Failed to load model: {e}")
+    st.error(f"Failed to load model: {e}")
 
 # === Page Config ===
 st.set_page_config(page_title="Insurance Cost Predictor", layout="wide", initial_sidebar_state="expanded")
@@ -18,7 +19,7 @@ theme = st.sidebar.selectbox("Choose Theme", ["Day Mode", "Night Mode"])
 
 # === Background Gradient ===
 def apply_background_gradient(theme):
-    if theme == "\u2600\ufe0f Day Mode":
+    if theme == "Day Mode":
         gradient = """
         <style>
         body {
@@ -42,7 +43,7 @@ apply_background_gradient(theme)
 
 # === Custom Theme CSS ===
 def inject_css(theme_mode):
-    if theme_mode == "\u2600\ufe0f Day Mode":
+    if theme_mode == "Day Mode":
         css = """
         <style>
             body { font-family: 'Segoe UI', sans-serif; }
@@ -100,7 +101,7 @@ menu = st.sidebar.radio("Navigation", ["Home", "Visualize Data", "Predict Cost",
 
 # === Home Page ===
 def home():
-    st.title("\ud83c\udfe0 Welcome to Insurance Cost Predictor")
+    st.title("Welcome to Insurance Cost Predictor")
     st.markdown("""
     This application predicts **medical insurance charges** based on user inputs.
 
@@ -114,7 +115,7 @@ def home():
 
 # === Data Visualization Page ===
 def visualize_data():
-    st.title("\ud83d\udcca Explore the Dataset")
+    st.title("Explore the Dataset")
     data = pd.read_csv("insurance.csv")
     data.columns = data.columns.str.strip().str.lower()
     st.subheader("Dataset Overview")
@@ -137,7 +138,7 @@ def visualize_data():
 
 # === Prediction Page ===
 def predict():
-    st.title("\ud83e\udde0 Predict Insurance Cost")
+    st.title("Predict Insurance Cost")
     st.markdown("""
     <div style="
         background: linear-gradient(135deg, #fdfcfb, #e2d1c3);
@@ -146,19 +147,19 @@ def predict():
         box-shadow: 0px 5px 25px rgba(0,0,0,0.15);
         margin-bottom: 2rem;
     ">
-        <h2 style="color:#4a148c; font-weight:700; text-align:center;">\ud83d\udccb Enter Patient Details</h2>
+        <h2 style="color:#4a148c; font-weight:700; text-align:center;">Enter Patient Details</h2>
     """, unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
     with col1:
-        age = st.slider("\ud83e\uddc3 Age", 18, 100, 25)
-        bmi = st.number_input("\u2696\ufe0f BMI", 10.0, 60.0, step=0.1)
-        children = st.selectbox("\ud83d\udc76 Number of Children", [0, 1, 2, 3, 4, 5])
+        age = st.slider("Age", 18, 100, 25)
+        bmi = st.number_input("BMI", 10.0, 60.0, step=0.1)
+        children = st.selectbox("Number of Children", [0, 1, 2, 3, 4, 5])
 
     with col2:
-        sex = st.radio("\ud83e\uddd1 Sex", ["male", "female"], horizontal=True)
-        smoker = st.radio("\ud83d\udeac Smoker", ["yes", "no"], horizontal=True)
-        region = st.selectbox("\ud83c\udf0d Region", ["southwest", "southeast", "northwest", "northeast"])
+        sex = st.radio("Sex", ["male", "female"], horizontal=True)
+        smoker = st.radio("Smoker", ["yes", "no"], horizontal=True)
+        region = st.selectbox("Region", ["southwest", "southeast", "northwest", "northeast"])
 
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -172,13 +173,13 @@ def predict():
     }])
 
     user_input_encoded = pd.get_dummies(user_input)
-    model_features = model.feature_names_in_
+    model_features = model.feature_names_in_ if hasattr(model, 'feature_names_in_') else user_input_encoded.columns
     for col in model_features:
         if col not in user_input_encoded:
             user_input_encoded[col] = 0
     user_input_encoded = user_input_encoded[model_features]
 
-    if st.button("\ud83d\udd2e Predict Cost"):
+    if st.button("Predict Cost"):
         prediction = model.predict(user_input_encoded)[0]
         st.markdown(f"""
         <div style="
@@ -191,20 +192,20 @@ def predict():
             color: #003366;
             box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
         ">
-            \ud83d\udcb0 Estimated Insurance Charges: <br> <span style="font-size: 2rem;">Rs {prediction:,.2f}</span>
+            Estimated Insurance Charges: <br> <span style="font-size: 2rem;">Rs {prediction:,.2f}</span>
         </div>
         """, unsafe_allow_html=True)
 
 # === About Page ===
 def about():
-    st.title("\ud83d\udcc4 About this App")
+    st.title("About this App")
     st.markdown("""
     **Insurance Cost Predictor** is a user-friendly ML dashboard built with:
-    - \ud83e\udde0 **Random Forest** for backend model  
-    - \ud83d\udda5\ufe0f **Streamlit** for interactive frontend  
-    - \ud83d\udcca **Plotly** for modern visualizations
+    - Random Forest for backend model  
+    - Streamlit for interactive frontend  
+    - Plotly for modern visualizations
 
-    ### \ud83d\udc65 Project Team:
+    ### Project Team:
     - **MD. Tanveer Alam** *(Team Lead)*  
     - Thanmai Yadla  
     - Pushpesh Kumar  
@@ -214,16 +215,16 @@ def about():
     - Megha Macchindra Sanap
 
     ---
-    \ud83d\udd17 [GitHub](https://github.com/MDTanveerAlam1)  
-    \ud83d\udd17 [LinkedIn](https://www.linkedin.com/in/md-tanveer-alam-b1ba14258)
+    [GitHub](https://github.com/MDTanveerAlam1)  
+    [LinkedIn](https://www.linkedin.com/in/md-tanveer-alam-b1ba14258)
     """)
 
 # === Routing ===
-if menu == "\ud83c\udfe0 Home":
+if menu == "Home":
     home()
-elif menu == "\ud83d\udcca Visualize Data":
+elif menu == "Visualize Data":
     visualize_data()
-elif menu == "\ud83e\udde0 Predict Cost":
+elif menu == "Predict Cost":
     predict()
-elif menu == "\ud83d\udcc4 About App":
+elif menu == "About App":
     about()
