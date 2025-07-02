@@ -5,8 +5,8 @@ import pickle
 import plotly.express as px
 
 # Load model
-import joblib
-model = joblib.load("random_forest_model.pkl")
+import pickle
+model = pickle.load(open("random_forest_model.pkl", "rb"))
 
 # Page settings
 st.set_page_config(
@@ -17,9 +17,6 @@ st.set_page_config(
 
 # ========= THEME TOGGLE =========
 theme = st.sidebar.selectbox("🎨 Choose Theme", ["☀️ Day Mode", "🌙 Night Mode"])
-
-# === THEME TOGGLE ===
-theme = st.sidebar.selectbox("🎨 Theme Mode", ["☀️ Day Mode", "🌙 Night Mode"])
 
 # === MINIMAL GRADIENT BACKGROUND INJECTION ===
 def apply_gradient_background(theme):
