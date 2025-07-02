@@ -14,7 +14,7 @@ except Exception as e:
 st.set_page_config(page_title="Insurance Cost Predictor", layout="wide", initial_sidebar_state="expanded")
 
 # === Theme Toggle ===
-theme = st.sidebar.selectbox("\ud83c\udfa8 Choose Theme", ["\u2600\ufe0f Day Mode", "\ud83c\udf19 Night Mode"])
+theme = st.sidebar.selectbox("Choose Theme", ["Day Mode", "Night Mode"])
 
 # === Background Gradient ===
 def apply_background_gradient(theme):
@@ -96,7 +96,7 @@ def inject_css(theme_mode):
 inject_css(theme)
 
 # === Sidebar Navigation ===
-menu = st.sidebar.radio("\ud83d\udcc1 Navigation", ["\ud83c\udfe0 Home", "\ud83d\udcca Visualize Data", "\ud83e\udde0 Predict Cost", "\ud83d\udcc4 About App"])
+menu = st.sidebar.radio("Navigation", ["Home", "Visualize Data", "Predict Cost", "About App"])
 
 # === Home Page ===
 def home():
