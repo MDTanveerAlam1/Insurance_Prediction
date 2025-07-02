@@ -1,18 +1,19 @@
-# insurance_app_advanced.py
+# insurance_app.py
 
 import streamlit as st
 import numpy as np
 import joblib
 import pandas as pd
 
-# ================== PAGE CONFIG ==================
+# ========== PAGE CONFIG ==========
 st.set_page_config(
-    page_title="🧾 Insurance Cost Estimator",
-    page_icon="💰",
-    layout="centered"
+    page_title="💸 MedInsure - Cost Estimator",
+    page_icon="💸",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# ================== MODEL LOADING ==================
+# ========== LOAD MODEL ==========
 @st.cache_resource
 def load_model():
     try:
@@ -23,102 +24,158 @@ def load_model():
 
 model = load_model()
 
-# ================== UI STYLES ==================
+# ========== GLOBAL STYLES ==========
 st.markdown("""
     <style>
-    body, .main {
+    body {
         background-color: #0a192f;
         color: #ffffff;
     }
-    .stButton>button {
-        background-color: #00d4ff;
-        color: #0a192f;
-        font-weight: 600;
-        border-radius: 10px;
-        height: 3em;
-        width: 100%;
-    }
-    .metric-box {
-        background-color: rgba(255,255,255,0.07);
-        padding: 20px;
-        border-radius: 15px;
-        text-align: center;
+    .card {
+        background: rgba(255,255,255,0.05);
+        padding: 25px;
+        border-radius: 16px;
         margin-bottom: 20px;
+    }
+    .predict-box {
+        background: linear-gradient(135deg, #00d4ff30, #90ee9030);
+        padding: 25px;
+        border-radius: 18px;
+        margin-top: 30px;
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+    }
+    .metric {
+        background: rgba(255,255,255,0.06);
+        padding: 12px;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 16px;
+    }
+    .footer {
+        margin-top: 40px;
+        font-size: 13px;
+        text-align: center;
+        opacity: 0.7;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# ================== HEADER ==================
-st.title("💰 Medical Insurance Cost Estimator")
-st.markdown("Estimate your annual medical insurance charges using a machine learning model trained on demographic and health factors.")
-
-st.markdown("---")
-
-# ================== USER INPUT ==================
-with st.form("predict_form"):
-    st.subheader("🔍 Input Your Information")
-
-    col1, col2 = st.columns(2)
-    with col1:
-        age = st.number_input("Age", 18, 100, 30, help="Age between 18 and 100")
-        bmi = st.slider("BMI (Body Mass Index)", 10.0, 50.0, 25.0, step=0.1)
-        sex = st.radio("Sex", ["Male", "Female"])
-    with col2:
-        children = st.selectbox("Number of Children", range(0, 6))
-        smoker = st.radio("Smoker?", ["Yes", "No"])
-        region = st.selectbox("Region", ["Southeast", "Southwest", "Northeast", "Northwest"])
-
-    submitted = st.form_submit_button("💡 Predict Cost")
-
-# ================== MODEL PREDICTION ==================
-if submitted and model:
-    sex_val = 1 if sex == "Male" else 0
-    smoker_val = 1 if smoker == "Yes" else 0
-    region_map = {"Southeast": 0, "Southwest": 1, "Northeast": 2, "Northwest": 3}
-    region_val = region_map[region]
-
-    input_data = np.array([[age, sex_val, bmi, children, smoker_val, region_val]])
-
-    try:
-        prediction = model.predict(input_data)[0]
-        st.success(f"🎯 Estimated Annual Medical Insurance Cost: **Rs {prediction:,.2f}**")
-
-        # Display breakdown
-        col1, col2, col3 = st.columns(3)
-        col1.metric("Age", f"{age} yrs")
-        col2.metric("BMI", f"{bmi:.1f}")
-        col3.metric("Smoker", "Yes 🚬" if smoker_val else "No ❌")
-
-        # Optional: simulate confidence if predict_proba not available
-        confidence = np.random.uniform(0.85, 0.95)  # Simulated
-        st.info(f"🧠 Model confidence: {confidence * 100:.1f}% (estimated)")
-
-        # Optional chart
-        if st.checkbox("📈 Show Comparison Charts"):
-            chart_col1, chart_col2 = st.columns(2)
-
-            with chart_col1:
-                st.subheader("Age Impact (Example)")
-                ages = list(range(18, 81, 5))
-                costs = [model.predict(np.array([[a, sex_val, bmi, children, smoker_val, region_val]]))[0] for a in ages]
-                st.line_chart(pd.DataFrame({"Cost": costs}, index=ages))
-
-            with chart_col2:
-                st.subheader("BMI Impact (Example)")
-                bmis = np.linspace(10, 50, 20)
-                bmi_costs = [model.predict(np.array([[age, sex_val, b, children, smoker_val, region_val]]))[0] for b in bmis]
-                st.line_chart(pd.DataFrame({"Cost": bmi_costs}, index=bmis))
-
-    except Exception as e:
-        st.error(f"❌ Prediction failed: {e}")
-
-# ================== FOOTER ==================
-st.markdown("---")
-st.markdown(
-    """
-    <div style="text-align:center; font-size:13px; opacity:0.7">
-        Built by <a href="https://github.com/MDTanveerAlam1" target="_blank" style="color:#00d4ff">MD Tanveer Alam</a> • Powered by Streamlit • 2025
+# ========== HEADER ==========
+st.markdown("""
+    <div style="text-align:center; margin-bottom:30px">
+        <h1 style="color:#00d4ff">💸 MedInsure</h1>
+        <p style="opacity:0.8; font-size:16px">AI-powered Medical Insurance Cost Estimator</p>
     </div>
-    """, unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
+# ========== NAVIGATION ==========
+page = st.sidebar.radio("📁 Navigation", ["🏠 Home", "💡 Predict", "📊 Insights", "ℹ️ About"])
+
+# ========== HOME ==========
+if page == "🏠 Home":
+    st.markdown("""
+        <div class="card">
+            <h2>Welcome to MedInsure</h2>
+            <p>This app uses a trained machine learning model to predict your annual medical insurance cost based on personal and health-related data.</p>
+            <ul>
+                <li>Trained on real-world demographic + medical cost data</li>
+                <li>Powered by Random Forest Regression (R² ≈ 0.86)</li>
+                <li>UI styled for modern clarity and readability</li>
+            </ul>
+            <p>Use the sidebar to navigate through the app ➡️</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+# ========== PREDICT ==========
+elif page == "💡 Predict":
+    with st.form("predict_form"):
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.subheader("📝 Enter Your Information")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            age = st.slider("Age", 18, 100, 30)
+            sex = st.radio("Sex", ["Male", "Female"], horizontal=True)
+            bmi = st.slider("BMI (Body Mass Index)", 10.0, 50.0, 25.0)
+        with col2:
+            children = st.selectbox("Number of Children", list(range(0, 6)))
+            smoker = st.radio("Smoker?", ["Yes", "No"], horizontal=True)
+            region = st.selectbox("Region", ["Southeast", "Southwest", "Northeast", "Northwest"])
+
+        st.markdown("</div>", unsafe_allow_html=True)
+        submit = st.form_submit_button("💡 Predict Insurance Cost")
+
+    if submit and model:
+        sex_val = 1 if sex == "Male" else 0
+        smoker_val = 1 if smoker == "Yes" else 0
+        region_map = {"Southeast": 0, "Southwest": 1, "Northeast": 2, "Northwest": 3}
+        region_val = region_map[region]
+
+        input_data = np.array([[age, sex_val, bmi, children, smoker_val, region_val]])
+
+        try:
+            prediction = model.predict(input_data)[0]
+
+            st.markdown(f"""
+                <div class="predict-box animate-fade-in">
+                    🧾 Estimated Insurance Cost: <span style="color:#00ffae">${prediction:,.2f}</span>
+                </div>
+            """, unsafe_allow_html=True)
+
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.markdown(f"<div class='metric'>🧬 BMI<br><strong>{bmi:.1f}</strong></div>", unsafe_allow_html=True)
+            with col2:
+                st.markdown(f"<div class='metric'>🎂 Age<br><strong>{age}</strong></div>", unsafe_allow_html=True)
+            with col3:
+                st.markdown(f"<div class='metric'>🚬 Smoker<br><strong>{smoker}</strong></div>", unsafe_allow_html=True)
+
+        except Exception as e:
+            st.error(f"Prediction failed: {e}")
+
+# ========== INSIGHTS ==========
+elif page == "📊 Insights":
+    st.subheader("📊 Simulated Insights (Age & BMI vs Cost)")
+
+    sex_val = 1
+    children = 1
+    smoker_val = 0
+    region_val = 0
+
+    # Age vs Cost
+    ages = list(range(18, 66, 3))
+    bmi_val = 27
+    costs_by_age = [model.predict(np.array([[a, sex_val, bmi_val, children, smoker_val, region_val]]))[0] for a in ages]
+    df_age = pd.DataFrame({'Age': ages, 'Predicted Cost': costs_by_age})
+    st.line_chart(df_age.set_index('Age'))
+
+    # BMI vs Cost
+    bmis = list(np.linspace(15, 45, 20))
+    age_val = 35
+    costs_by_bmi = [model.predict(np.array([[age_val, sex_val, b, children, smoker_val, region_val]]))[0] for b in bmis]
+    df_bmi = pd.DataFrame({'BMI': bmis, 'Predicted Cost': costs_by_bmi})
+    st.line_chart(df_bmi.set_index('BMI'))
+
+# ========== ABOUT ==========
+elif page == "ℹ️ About":
+    st.markdown("""
+        <div class="card">
+            <h2>About This App</h2>
+            <p>Developed by <strong>MD Tanveer Alam</strong> as part of a machine learning deployment project.</p>
+            <ul>
+                <li>Language: Python</li>
+                <li>Framework: Streamlit</li>
+                <li>Model: Random Forest Regressor</li>
+            </ul>
+            <p>GitHub: <a href="https://github.com/MDTanveerAlam1" target="_blank">MDTanveerAlam1</a></p>
+        </div>
+    """, unsafe_allow_html=True)
+
+# ========== FOOTER ==========
+st.markdown("""
+    <div class="footer">
+        MedInsure v2.0 | © 2025 | Built by <a href="https://github.com/MDTanveerAlam1" target="_blank" style="color:#00d4ff">MD Tanveer Alam</a>
+    </div>
+""", unsafe_allow_html=True)
