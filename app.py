@@ -55,7 +55,7 @@ if submit:
     prediction = model.predict(input_data)[0]
 
     # Output
-    st.success(f"💰 Estimated Medical Insurance Cost: **${prediction:,.2f}**")
+    st.success(f"💰 Estimated Medical Insurance Cost: **Rs{prediction:,.2f}**")
 
     st.info("This is only an estimate based on the trained model. Real costs may vary.")
 
