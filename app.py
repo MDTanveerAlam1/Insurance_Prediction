@@ -5,11 +5,8 @@ import pickle
 import plotly.express as px
 
 # Load model
-try:
-    import joblib
-    model = joblib.load("random_forest_model.pkl")
-except Exception as e:
-    st.error(f"❌ Failed to load model: {e}")
+import joblib
+model = joblib.load("random_forest_model.pkl")
 
 # Page settings
 st.set_page_config(
