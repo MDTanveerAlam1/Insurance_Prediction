@@ -10,6 +10,7 @@ try:
         model = pickle.load(f)
 except Exception as e:
     st.error(f"Failed to load model: {e}")
+    model = None
 
 # === Page Config ===
 st.set_page_config(page_title="Insurance Cost Predictor", layout="wide", initial_sidebar_state="expanded")
@@ -173,28 +174,33 @@ def predict():
     }])
 
     user_input_encoded = pd.get_dummies(user_input)
-    model_features = model.feature_names_in_ if hasattr(model, 'feature_names_in_') else user_input_encoded.columns
-    for col in model_features:
-        if col not in user_input_encoded:
-            user_input_encoded[col] = 0
-    user_input_encoded = user_input_encoded[model_features]
+    if model is not None:
+        try:
+            model_features = model.feature_names_in_
+        except AttributeError:
+            model_features = user_input_encoded.columns
 
-    if st.button("Predict Cost"):
-        prediction = model.predict(user_input_encoded)[0]
-        st.markdown(f"""
-        <div style="
-            background: linear-gradient(to right, #a1c4fd, #c2e9fb);
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #003366;
-            box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
-        ">
-            Estimated Insurance Charges: <br> <span style="font-size: 2rem;">Rs {prediction:,.2f}</span>
-        </div>
-        """, unsafe_allow_html=True)
+        for col in model_features:
+            if col not in user_input_encoded:
+                user_input_encoded[col] = 0
+        user_input_encoded = user_input_encoded[model_features]
+
+        if st.button("Predict Cost"):
+            prediction = model.predict(user_input_encoded)[0]
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+                padding: 1.5rem;
+                border-radius: 12px;
+                text-align: center;
+                font-size: 1.4rem;
+                font-weight: bold;
+                color: #003366;
+                box-shadow: 0px 4px 20px rgba(0,0,0,0.1);
+            ">
+                Estimated Insurance Charges: <br> <span style="font-size: 2rem;">Rs {prediction:,.2f}</span>
+            </div>
+            """, unsafe_allow_html=True)
 
 # === About Page ===
 def about():
